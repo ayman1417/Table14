@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+@import url("https://fonts.googleapis.com/css2?family=Sansita:ital,wght@0,400;0,700;0,800;0,900;1,400;1,700;1,800;1,900&display=swap");
+
+@theme {
+  /* Brand Colors */
+  --color-main: #f59e0b; /* Main brand (orange) */
+  --color-accent: #fbbf24; /* Lighter warm accent */
+
+  /* Background System */
+  --color-background: #F5F5F5; /* Page background */
+  --color-surface: #fef3c7; /* Cards / containers */
+
+  /* Text System */
+  --color-mainDark: #1f2937; /* Main text (dark) */
+  --color-dark: #1a1716; /* Main text (dark) */
+  --color-muted: #4b5563; /* Muted text */
+}
+
+body {
+  font-family: "Sansita", sans-serif;
+  background-color: var(--color-background);
+}
