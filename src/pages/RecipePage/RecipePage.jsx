@@ -1,7 +1,7 @@
 import axios from 'axios'
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router'
-import Recipe from '../../Components/recipe/recipe'
+import Recipe from '../../Components/Recipe/Recipe'
 import { Link } from 'react-router-dom'
 import { Button } from '@heroui/react'
 export default function RecipePage() {
