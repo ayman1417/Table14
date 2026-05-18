@@ -8,16 +8,28 @@ import {
     NavbarItem,
     Button,
     Input,
+    Dropdown,
+    DropdownTrigger,
+    DropdownMenu,
+    DropdownItem,
 } from "@heroui/react";
-import { Link } from 'react-router-dom'
+
+import { Link, NavLink, useNavigate } from 'react-router-dom';
 import logo from "../../assets/logo.png";
+import { useContext, useState } from "react";
+import { isLoginContext } from "../../Contexts/IsLoginContext";
+import categoriesNames from "../../helper/CategoriesNames";
+import axios from "axios";
+import { searchContext } from "../../Contexts/SearchContext";
+import { loadContext } from "../../Contexts/LoadContext";
+
 export const AcmeLogo = () => {
     return (
-        <Link to="/" className="">
+        <Link to="/">
             <img
                 src={logo}
                 alt="Table14 Logo"
-                className="h-24  object-contain"
+                className="h-24 object-contain"
             />
         </Link>
     );
@@ -30,9 +42,8 @@ export const SearchIcon = ({ size = 24, strokeWidth = 1.5, width, height, ...pro
             fill="none"
             focusable="false"
             height={height || size}
-            role="presentation"
-            viewBox="0 0 24 24"
             width={width || size}
+            viewBox="0 0 24 24"
             {...props}
         >
             <path
@@ -53,121 +64,151 @@ export const SearchIcon = ({ size = 24, strokeWidth = 1.5, width, height, ...pro
     );
 };
 
+
 export default function App() {
-    const menuItems = [
-        "home",
-        "categories",
-        "areas",
-        "ingredients",
-        "recipes",
-    ];
+
+    const navigate = useNavigate();
+    const { setLogged } = useContext(isLoginContext);
+    const { searchReady, setSearchReady } = useContext(searchContext);
+    const { setLoading } = useContext(loadContext);
+
+    const [selected, setSelected] = useState([]);
+    const [searchValue, setSearchValue] = useState("");
+
+
+    
+
+    function logOut() {
+        navigate("/register");
+        setLogged(false);
+        localStorage.removeItem("loggedUser");
+    }
+
+    const menuItems = ["home", "areas", "recipes"];
+
+    const linkClass = ({ isActive }) =>
+        `${isActive ? "text-main" : "text-mainDark"} hover:text-main text-xl duration-300 font-medium`;
+
+    async function searchRecipes(e) {
+        const value = e.target.value;
+        setSearchValue(value);
+
+        if (!value.trim()) return;
+
+        setLoading(true);
+
+        axios.get(`https://www.themealdb.com/api/json/v1/1/search.php?s=${value}`)
+            .then((res) => {
+                setSearchReady(res.data.meals || []);
+                navigate("/recipes");
+            })
+            .finally(() => setLoading(false));
+    }
+
     return (
-        <Navbar isBordered shouldHideOnScroll className="bg-background py-1 border-mainDark  max-w-full  "
-            classNames={{
-                wrapper: "max-w-full px-6",
-            }}
+        <Navbar isBordered shouldHideOnScroll className="bg-background py-1 border-mainDark max-w-full"
+            classNames={{ wrapper: "max-w-full px-6" }}
         >
-            {/* left content */}
-            <NavbarContent className="md:hidden flex gap-3 " justify="start">
-                <NavbarMenuToggle className="text-black font-bold hover:pointer-coarse::" />
-                <NavbarContent >
-                    <NavbarBrand className=" ">
-                        <AcmeLogo />
-                    </NavbarBrand>
-                    <NavbarContent className="hidden md:flex gap-3">
 
-                        <NavbarItem isActive>
-                            <Link aria-current="page" className="text-white hover:text-main duration-300  font-medium" to="/categories">
+            {/* LEFT */}
+            <NavbarContent className="md:hidden flex gap-3" >
+                <NavbarMenuToggle />
+
+                <NavbarBrand>
+                    <AcmeLogo />
+                </NavbarBrand>
+            </NavbarContent>
+
+            {/* CENTER */}
+            <NavbarContent className="hidden md:flex xl:me-96 ">
+
+                <NavbarBrand>
+                    <AcmeLogo />
+                </NavbarBrand>
+
+                <NavbarItem>
+                    <NavLink to="/recipes" className={linkClass}>
+                        Meals
+                    </NavLink>
+                </NavbarItem>
+
+                <NavbarItem>
+                    <NavLink to="/areas" className={linkClass}>
+                        Areas
+                    </NavLink>
+                </NavbarItem>
+
+                <NavbarItem>
+                    <NavLink to="/My-Table" className={linkClass}>
+                        My Table
+                    </NavLink>
+                </NavbarItem>
+
+                <NavbarItem>
+                    <Dropdown>
+                        <DropdownTrigger>
+                            <Button variant="none" className={"text-mainDark hover:text-main text-lg duration-300 font-medium -ms-4"}>
                                 Categories
-                            </Link>
-                        </NavbarItem>
-                        <NavbarItem>
-                            <Link className="text-white hover:text-main duration-300 font-medium" to="/ingredients">
-                                Ingredients
-                            </Link>
-                        </NavbarItem>
-                        <NavbarItem>
-                            <Link className="text-white hover:text-main duration-300 font-medium" to="/recipes">
-                                Recipes
-                            </Link>
-                        </NavbarItem>
-                        <NavbarItem>
-                            <Link className="text-white hover:text-main duration-300 font-medium" to="/areas">
-                                Areas
-                            </Link>
-                        </NavbarItem>
-                    </NavbarContent>
-                </NavbarContent>
+                            </Button>
+                        </DropdownTrigger>
+
+                        <DropdownMenu
+                            selectedKeys={selected}
+                            selectionMode="single"
+                            onSelectionChange={setSelected}
+                        >
+                            {categoriesNames.map((c) => (
+                                <DropdownItem
+                                    key={c.strCategory}
+                                    as={Link}
+                                    to={`/categories/${c.strCategory}`}
+                                >
+                                    {c.strCategory}
+                                </DropdownItem>
+                            ))}
+                        </DropdownMenu>
+                    </Dropdown>
+                </NavbarItem>
 
             </NavbarContent>
-            <NavbarContent justify="start " className="">
 
-                <NavbarContent className="hidden md:flex gap-4">
-                    <NavbarBrand className=" ">
-                        <AcmeLogo />
-                    </NavbarBrand>
-                    <NavbarItem isActive>
-                        <Link aria-current="page" className="text-mainDark hover:text-main text-lg duration-300  font-medium" to="/categories">
-                            Categories
-                        </Link>
-                    </NavbarItem>
-                    <NavbarItem>
-                        <Link className="text-mainDark hover:text-main text-lg duration-300 font-medium" to="/ingredients">
-                            Ingredients
-                        </Link>
-                    </NavbarItem>
-                    <NavbarItem>
-                        <Link className="text-mainDark hover:text-main text-lg duration-300 font-medium" to="/recipes">
-                            Recipes
-                        </Link>
-                    </NavbarItem>
-                    <NavbarItem>
-                        <Link className="text-mainDark hover:text-main text-lg duration-300 font-medium" to="/areas">
-                            Areas
-                        </Link>
-                    </NavbarItem>
-                </NavbarContent>
-            </NavbarContent>
+            {/* RIGHT */}
+            <NavbarContent justify="end">
 
-            {/* right content */}
-
-            <NavbarContent as="div" className="items-center    " justify="end">
                 <Input
                     classNames={{
                         base: "sm:max-w-[16rem] min-w-[10rem] h-11",
                         input: "text-sm",
                         inputWrapper:
-                            "h-full bg-white border border-mainDark/30 rounded-xl " +
-                            "hover:border-mainDark transition-all duration-300 " +
-                            "focus-within:border-mainDark focus-within:ring-2 focus-within:ring-mainDark/30",
+                            "h-full bg-white border border-mainDark/30 rounded-xl hover:border-mainDark transition-all duration-300"
                     }}
                     placeholder="Search recipes..."
                     startContent={<SearchIcon size={18} className="text-mainDark/50" />}
-                    type="search"
+                    value={searchValue}
+                    onChange={searchRecipes}
                 />
-                <Button as={Link} color="default" href="#" variant="bordered" className=" text-white font-bold hover:text-mainDark hover:border-main border-mainDark hover:bg-main bg-mainDark duration-300" >
-                    Sign Up
+
+                <Button
+                    onPress={logOut}
+                    variant="bordered"
+                    className="text-white font-bold hover:text-mainDark hover:border-main border-mainDark hover:bg-main bg-mainDark duration-300"
+                >
+                    Log out
                 </Button>
+
             </NavbarContent>
 
-            {/* toggler */}
-
+            {/* MOBILE MENU */}
             <NavbarMenu>
                 {menuItems.map((item, index) => (
                     <NavbarMenuItem key={`${item}-${index}`}>
-                        <Link
-                            className="w-full"
-                            color={
-                                index === 2 ? "warning" : index === menuItems.length - 1 ? "danger" : "foreground"
-                            }
-                            href="#"
-                            size="lg"
-                        >
+                        <Link className="w-full" to={`/${item}`}>
                             {item}
                         </Link>
                     </NavbarMenuItem>
                 ))}
             </NavbarMenu>
+
         </Navbar>
     );
 }

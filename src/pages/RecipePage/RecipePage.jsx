@@ -1,21 +1,34 @@
 import axios from 'axios'
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { useParams } from 'react-router'
 import Recipe from '../../Components/Recipe/Recipe'
 import { Link } from 'react-router-dom'
 import { Button } from '@heroui/react'
+import { loadContext } from '../../Contexts/LoadContext'
+import Loading from '../Loading/Loading'
 export default function RecipePage() {
+    const { loading, setLoading } = useContext(loadContext)
     const { id } = useParams()
     const [recipe, setRecipe] = useState()
     async function getRecipe(id) {
-        const res = await axios.get(`https://www.themealdb.com/api/json/v1/1/lookup.php?i=${id}`)
-        console.log(res.data.meals[0])
-        setRecipe(res.data.meals[0])
+        await axios.get(`https://www.themealdb.com/api/json/v1/1/lookup.php?i=${id}`).then((res) => {
+            setLoading(true)
+            setRecipe(res.data.meals[0])
+        }).catch((err)=>{
+            console.log(err);
+        }).finally(()=>{
+            setLoading(false)
+            console.log("done");
+        })
     }
 
     useEffect(() => {
         getRecipe(id)
     }, [])
+
+    if (loading) {
+        return <Loading />
+    }
     return (
         <div className="p-5 lg:w-4/5 min-h-screen lg:mx-auto bg-white rounded-2xl shadow-lg">
             <div className=" grid grid-cols-1  lg:grid-cols-3 gap-3 ">

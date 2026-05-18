@@ -1,0 +1,20 @@
+import React from 'react'
+import axios from 'axios'
+import { useEffect, useState } from 'react'
+import areasFlags from '../../helper/areasFlags '
+import { Link } from 'react-router'
+
+export default function Area({ area , index }) {
+    return (
+
+        <Link to={`/area/${area?.name}`} className={`bg-white overflow-hidden rounded-3xl shadow-xl group  hover:-translate-y-2 cursor-pointer ${index % 2 == 0 ? "hover:rotate-1" : "hover:-rotate-1"} transform transition duration-300  `} >
+            <div className="w-full">
+                <img className='overflow-hidden h-52  sm:h-40  w-full     ' src={`https://flagcdn.com/w320/${area?.code}.png`} alt="" srcset="" />
+            </div>
+            <div className="p-3">
+                <h1 key={area?.name} className='text-2xl font-semibold group-hover:text-main transition  text-center'>   {area?.name}</h1>
+            </div>
+        </Link>
+
+    )
+}

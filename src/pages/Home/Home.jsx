@@ -1,24 +1,34 @@
-import React, { use, useEffect, useState } from 'react'
-import foodimg from "../../assets/ben-lei-flFd8L7_B3g-unsplash.jpg"
-import foodimg2 from "../../assets/food.jpg"
+import React, { use, useContext, useEffect, useState } from 'react'
 import { Button } from '@heroui/react'
 import { Link } from 'react-router-dom'
 import axios from 'axios'
+import { loadContext } from '../../Contexts/LoadContext'
+import Loading from '../Loading/Loading'
 export default function Home() {
 
     const [recipe, setRecipe] = useState();
+    const { loading, setLoading } = useContext(loadContext);
 
 
     async function getRecipe() {
-        const { data } = await axios.get("https://www.themealdb.com/api/json/v1/1/lookup.php?i=52776")
-        console.log(data.meals[0])
-        setRecipe(data.meals[0])
+        setLoading(true)
+        await axios.get("https://www.themealdb.com/api/json/v1/1/random.php").then((res) => {
+            setRecipe(res.data.meals[0])
+        }).catch((err) => {
+            console.log(err);
+        }).finally(() => {
+            console.log("done");
+            setLoading(false)
+        })
     }
 
     useEffect(() => {
         getRecipe()
     }, [])
 
+    if (loading) {
+        return <Loading />
+    }
 
     return (
         <div className="h-screen grid md:grid-cols-2">
